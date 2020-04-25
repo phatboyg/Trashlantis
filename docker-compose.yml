@@ -1,0 +1,20 @@
+version: "3.6"
+
+networks:
+  trashlantis:
+
+services:
+  rabbitmq:
+    image: masstransit/rabbitmq:latest
+    networks:
+     - trashlantis
+    ports:
+     - "5672:5672"
+     - "15672:15672"
+     - "15692:15692"
+  sqlserver:
+    image: masstransit/sqlserver-quartz
+    networks:
+     - trashlantis
+    ports:
+      - 1433:1433
