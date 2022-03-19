@@ -2,13 +2,11 @@ namespace Trashlantis.Api
 {
     using System;
     using MassTransit;
-    using MassTransit.Definition;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Diagnostics.HealthChecks;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.Extensions.Hosting;
 
@@ -27,25 +25,21 @@ namespace Trashlantis.Api
         {
             services.AddHealthChecks();
 
-            services.TryAddSingleton(KebabCaseEndpointNameFormatter.Instance);
-            services.AddMassTransit(cfg =>
+            services.AddMassTransit(x =>
             {
-                cfg.AddBus(provider =>
+                x.SetKebabCaseEndpointNameFormatter();
+
+                x.UsingRabbitMq((context, cfg) =>
                 {
-                    return Bus.Factory.CreateUsingRabbitMq(x =>
-                    {
-                        x.UseHealthCheck(provider);
-                    });
+                    cfg.ConfigureEndpoints(context);
                 });
             });
 
             services.Configure<HealthCheckPublisherOptions>(options =>
             {
                 options.Delay = TimeSpan.FromSeconds(2);
-                options.Predicate = (check) => check.Tags.Contains("ready");
+                options.Predicate = check => check.Tags.Contains("ready");
             });
-
-            services.AddMassTransitHostedService();
 
             services.AddOpenApiDocument(cfg => cfg.PostProcess = d => d.Info.Title = "Welcome to Trashlantis");
 

@@ -2,10 +2,7 @@ namespace Trashlantis.Components.StateMachines
 {
     using System;
     using System.Threading.Tasks;
-    using Contracts;
-    using GreenPipes;
     using MassTransit;
-    using MassTransit.Definition;
 
 
     public class TrashRemovalSagaDefinition :

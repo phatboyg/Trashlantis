@@ -1,9 +1,7 @@
 namespace Trashlantis.Components.StateMachines
 {
     using System;
-    using Automatonymous;
     using Contracts;
-    using GreenPipes;
     using MassTransit;
 
 
@@ -24,19 +22,22 @@ namespace Trashlantis.Components.StateMachines
                 When(TrashRemovalRequested)
                     .Then(x =>
                     {
-                        x.Instance.BinNumber = x.Data.BinNumber;
-                        x.Instance.RequestTimestamp = x.GetPayload<ConsumeContext>().SentTime ?? DateTime.UtcNow;
+                        x.Saga.BinNumber = x.Message.BinNumber;
+                        x.Saga.RequestTimestamp = x.GetPayload<ConsumeContext>().SentTime ?? DateTime.UtcNow;
                     })
-                    .PublishAsync(x => x.Init<EmptyTrashBin>(new {x.Data.BinNumber}))
+                    .PublishAsync(x => x.Init<EmptyTrashBin>(new { x.Message.BinNumber }))
                     .TransitionTo(Requested));
 
             During(Requested,
                 When(TrashRemovalRequested)
-                    .PublishAsync(x => x.Init<EmptyTrashBin>(new {x.Data.BinNumber})));
+                    .PublishAsync(x => x.Init<EmptyTrashBin>(new { x.Message.BinNumber })));
         }
 
-        public State Requested { get; private set; }
+        //
+        // ReSharper disable UnassignedGetOnlyAutoProperty
+        // ReSharper disable MemberCanBePrivate.Global
+        public State Requested { get; }
 
-        public Event<TakeOutTheTrash> TrashRemovalRequested { get; private set; }
+        public Event<TakeOutTheTrash> TrashRemovalRequested { get; }
     }
 }

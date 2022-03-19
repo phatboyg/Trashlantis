@@ -13,8 +13,11 @@ services:
      - "15672:15672"
      - "15692:15692"
   sqlserver:
-    image: masstransit/sqlserver-quartz
+    image: "mcr.microsoft.com/mssql/server:2017-latest"
+    environment:
+      - "ACCEPT_EULA=Y"
+      - "SA_PASSWORD=Password12!"
     networks:
      - trashlantis
     ports:
-      - 1433:1433
+      - 1433:1433    

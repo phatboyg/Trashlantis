@@ -5,12 +5,8 @@
     using Components;
     using Components.StateMachines;
     using MassTransit;
-    using MassTransit.Definition;
-    using MassTransit.EntityFrameworkCoreIntegration;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using Serilog;
@@ -36,12 +32,12 @@
                 })
                 .ConfigureServices((hostContext, services) =>
                 {
-                    services.TryAddSingleton(KebabCaseEndpointNameFormatter.Instance);
                     services.AddMassTransit(x =>
                     {
+                        x.SetKebabCaseEndpointNameFormatter();
                         x.AddConsumer<TrashConsumer>();
 
-                        x.AddSagaStateMachine<TrashRemovalStateMachine, TrashRemovalState>(typeof(TrashRemovalSagaDefinition))
+                        x.AddSagaStateMachine<TrashRemovalStateMachine, TrashRemovalState, TrashRemovalSagaDefinition>()
                             .EntityFrameworkRepository(r =>
                             {
                                 r.ConcurrencyMode = ConcurrencyMode.Pessimistic;
@@ -56,10 +52,11 @@
                                 });
                             });
 
-                        x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg => cfg.ConfigureEndpoints(provider)));
+                        x.UsingRabbitMq((context, cfg) =>
+                        {
+                            cfg.ConfigureEndpoints(context);
+                        });
                     });
-
-                    services.AddSingleton<IHostedService, MassTransitConsoleHostedService>();
                 })
                 .ConfigureLogging((hostingContext, logging) =>
                 {

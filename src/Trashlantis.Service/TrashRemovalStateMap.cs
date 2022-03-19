@@ -1,7 +1,7 @@
 namespace Trashlantis.Service
 {
     using Components.StateMachines;
-    using MassTransit.EntityFrameworkCoreIntegration.Mappings;
+    using MassTransit;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
